@@ -1,4 +1,5 @@
 // MAP image url
+//var imgUrl = "https://felho.gombaszog.sk/api/mapimage",
 var imgUrl = "https://www.gombaszog.sk/assets/terkep_raszter_upd-e41ec1cdb42ddf34a97a944e9768fcac.png",
     img = document.getElementById("mapimg");
 
@@ -18,11 +19,12 @@ $(document).ready(function(){
       imgResized = imgSmallSize();
       changeHighlightBoxWindowResize();
     });
-/*
+
     $("input").on("change", function(){
+      console.log(this.value);
       changeHighlightBoxFormChange(this.id);
     });
-*/
+
     // IMAGE original size
     function imgOriginalSize(){
         var imgWidth = img.naturalWidth;
@@ -93,22 +95,28 @@ $(document).ready(function(){
     }
 
     // CHANGE the highlight box on change in form
-    /*function changeHighlightBoxFormChange(id){
+    function changeHighlightBoxFormChange(id){
       console.log(id);
       values = divideValues(formValues(), imgDifference(imgOriginal, imgResized));
       coords = [drawnBox[0].offsetLeft, drawnBox[0].offsetTop, drawnBox[0].offsetWidth, drawnBox[0].offsetTop];
       var temp;
       if(id == "x1"){
-        if(values[0] > coords[0]){
-          temp = values[0] - coords[0];
+        temp = values[0] - coords[0];
+        if(temp <= 0){
+          drawnBox.css({
+            left: values[0],
+            width: coords[2] + Math.abs(temp)
+          });
         }
         else{
-          temp = coords[0] - values[0];
+          drawnBox.css({
+            left: values[0],
+            width: coords[2] - Math.abs(temp)
+          });
         }
-        drawnBox.css({
-          left: values[0],
-          width: coords[3] + temp
-        });
+        console.log(values[0]);
+        console.log(temp);
+        console.log(coords[2] + temp);
       }
       else if(id == "y1"){
 
@@ -121,7 +129,7 @@ $(document).ready(function(){
       }
 
     }
-*/
+
     // DRAW the highlight box
     function getStartCoordianates(e){
       if(e.type == "mousedown"){
