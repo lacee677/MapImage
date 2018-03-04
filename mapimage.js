@@ -1,70 +1,83 @@
 // MAP image url
-//var imgUrl = "https://felho.gombaszog.sk/api/mapimage",
-var imgUrl = "https://www.gombaszog.sk/assets/terkep_raszter_upd-e41ec1cdb42ddf34a97a944e9768fcac.png",
+var imgUrl = "https://felho.gombaszog.sk/api/mapimage",
     img = document.getElementById("mapimg");
 
 img.setAttribute("src", imgUrl);
 
 $(document).ready(function(){
   $("img").on("load", function(){
-    var imgOriginal = imgOriginalSize(),
-        imgResized = imgSmallSize();
+    var imgOriginal = [ img.naturalWidth, img.naturalHeight ],
+        imgResized = [ img.width, img.height ],
+        imgDiff = [ imgOriginal[0] / imgResized[0], imgOriginal[1] / imgResized[1] ];
 
     var drawnBox = $("#drawnBox"),
         container = $('#mapContainer');
 
+    container.css({position: 'relative'});
+
     container.on("mousedown mousemove mouseup", getStartCoordianates);
 
     $(window).resize(function(){
-      imgResized = imgSmallSize();
+      imgResized = [ img.width, img.height ];
+      imgDiff = [ imgOriginal[0] / imgResized[0], imgOriginal[1] / imgResized[1] ];
       changeHighlightBoxWindowResize();
     });
 
-    $("input").on("change", function(){
-      console.log(this.value);
-      changeHighlightBoxFormChange(this.id);
+    $("#x1").on("onkeypress mouseup", function(){
+      if(this.value <= imgOriginal[0] &&
+          this.value >= 0 ){
+        drawnBox.css({
+          left: this.value  / imgDiff[0]
+        });
+      }
+
+      console.log(formValues());
     });
 
-    // IMAGE original size
-    function imgOriginalSize(){
-        var imgWidth = img.naturalWidth;
-            imgHeight = img.naturalHeight;
-        return [imgWidth, imgHeight];
-    }
+    $("#x2").on("onkeypress mouseup", function(){
+      if(drawnBox[0].offsetLeft != this.value &&
+          this.value < imgOriginal[0] &&
+          this.value > 0 ){
+        var nWidth = this.value - ( drawnBox[0].offsetLeft * imgDiff[0] );
+      }
+      else{
+       var nWidth = 0;
+      }
+      drawnBox.css({
+        width: nWidth  / imgDiff[0]
+      });
 
-    // RESIZED image size
-    function imgSmallSize(){
-      var imgSmallWidth = img.width,
-          imgSmallHeight = img.height;
-      return [imgSmallWidth, imgSmallHeight];
-    }
+      console.log(formValues());
+    });
 
-    // DIFFERECE between original and resized image
-    function imgDifference(imgO, imgR){
-      var imgWidthDiff = imgO[0] / imgR[0],
-          imgHeightDiff = imgO[1] / imgR[1];
-      return [imgWidthDiff, imgHeightDiff];
-    }
+    $("#y1").on("onkeypress mouseup", function(){
+      if(this.value <= imgOriginal[1] &&
+          this.value >= 0 ){
+        drawnBox.css({
+          top: this.value / imgDiff[1]
+        });
+      }
 
-    // MULTIPLY values for original image
-    function multiplyValues(smallValues, multiplyValue){
-      var x1 = smallValues[0] * multiplyValue[0],
-          y1 = smallValues[1] * multiplyValue[1],
-          x2 = smallValues[2] * multiplyValue[0],
-          y2 = smallValues[3] * multiplyValue[1];
-      return [x1, y1, x2, y2];
-    }
+      console.log(formValues());
+    });
 
-    // DIVIDE values for resized image
-    function divideValues(bigValues, multiplyValue){
-      var x1 = bigValues[0] / multiplyValue[0],
-          y1 = bigValues[1] / multiplyValue[1],
-          x2 = bigValues[2] / multiplyValue[0],
-          y2 = bigValues[3] / multiplyValue[1];
-      return [x1, y1, x2, y2];
-    }
+    $("#y2").on("onkeypress mouseup", function(){
+      if(drawnBox[0].offsetTop != this.value &&
+          this.value < imgOriginal[1] &&
+          this.value > 0 ){
+        var nHeight = this.value - ( drawnBox[0].offsetTop * imgDiff[1] );
+      }
+      else{
+       var nHeight = 0; 
+      }
+      drawnBox.css({
+        height: nHeight  / imgDiff[1]
+      });
 
-    // GET the form values
+      console.log(formValues());
+    });
+
+        // GET the form values
     function formValues(){
       x1 = document.getElementById("x1").value;
       y1 = document.getElementById("y1").value;
@@ -73,61 +86,42 @@ $(document).ready(function(){
       return [x1, y1, x2, y2];
     }
 
-    // SET the form value when drawing
-    function setFormValueOnDraw(x1, y1, x2, y2){
-      bigValues = multiplyValues([x1, y1, x2, y2], imgDifference(imgOriginal, imgResized));
-      $("#x1").val(bigValues[0]);
-      $("#y1").val(bigValues[1]);
-      $("#x2").val(bigValues[2]);
-      $("#y2").val(bigValues[3]);
-    }
-
     // CHANGE the highlight box on window resize
     function changeHighlightBoxWindowResize(){
-      values = divideValues(formValues(), imgDifference(imgOriginal, imgResized));
+      values = divideValues( formValues() );
       drawnBox.css({
         left: values[0],
         top: values[1],
         width: values[2] - values[0],
         height: values[3] - values[1]
-      })
-
+      });
     }
 
-    // CHANGE the highlight box on change in form
-    function changeHighlightBoxFormChange(id){
-      console.log(id);
-      values = divideValues(formValues(), imgDifference(imgOriginal, imgResized));
-      coords = [drawnBox[0].offsetLeft, drawnBox[0].offsetTop, drawnBox[0].offsetWidth, drawnBox[0].offsetTop];
-      var temp;
-      if(id == "x1"){
-        temp = values[0] - coords[0];
-        if(temp <= 0){
-          drawnBox.css({
-            left: values[0],
-            width: coords[2] + Math.abs(temp)
-          });
-        }
-        else{
-          drawnBox.css({
-            left: values[0],
-            width: coords[2] - Math.abs(temp)
-          });
-        }
-        console.log(values[0]);
-        console.log(temp);
-        console.log(coords[2] + temp);
-      }
-      else if(id == "y1"){
+    // MULTIPLY values for original image
+    function multiplyValues(smallValues){
+      var x1 = smallValues[0] * imgDiff[0],
+          y1 = smallValues[1] * imgDiff[1],
+          x2 = smallValues[2] * imgDiff[0],
+          y2 = smallValues[3] * imgDiff[1];
+      return [x1, y1, x2, y2];
+    }
 
-      }
-      else if(id =="x2"){
+    // DIVIDE values for resized image
+    function divideValues(bigValues, multiplyValue){
+      var x1 = bigValues[0] / imgDiff[0],
+          y1 = bigValues[1] / imgDiff[1],
+          x2 = bigValues[2] / imgDiff[0],
+          y2 = bigValues[3] / imgDiff[1];
+      return [x1, y1, x2, y2];
+    }
 
-      }
-      else if(id == "y2"){
-
-      }
-
+    // SET the form value when drawing
+    function setFormValueOnDraw(x1, y1, x2, y2){
+      bigValues = multiplyValues( [x1, y1, x2, y2] );
+      $("#x1").val( parseInt( bigValues[0] ) );
+      $("#y1").val( parseInt( bigValues[1] ) );
+      $("#x2").val( parseInt( bigValues[2] ) );
+      $("#y2").val( parseInt( bigValues[3] ) );
     }
 
     // DRAW the highlight box
@@ -160,74 +154,3 @@ $(document).ready(function(){
     }
   });
 });
-/*
-var dp = $('#map-container');
-    dp.css({position: 'relative'});
-    dp.on("mousemove mousedown mouseup", draw_a_box);
-var draw = false;
-
-function draw_a_box(e){
-  var pageX = e.pageX,
-      pageY = e.pageY,
-      dpCurrent = dp.find('.drawnBox.current'),
-      dpCurrent_data = dpCurrent.data();
-
-  if(e.type === 'mousemove'){
-        // If ".drawnBox.current" doesn't exist, create it.
-    if(dpCurrent.length < 1){
-      $('<div class="drawnBox current"></div>').appendTo(dp);
-    }
-    var drawCSS = {};
-    // If drawing is initiated.
-    if(draw){
-            // Determine the direction.
-            // xLeft
-      if(dpCurrent_data.pageX > pageX){
-        drawCSS['right'] = dp.width() - dpCurrent_data.pageX,
-        drawCSS['left'] = 'auto',
-        drawCSS['width'] = dpCurrent_data.pageX - pageX;
-      }
-              // xRight
-      else if(dpCurrent_data.pageX < pageX){
-        drawCSS['left'] = dpCurrent_data.pageX,
-        drawCSS['right'] = 'auto',
-        drawCSS['width'] = pageX - dpCurrent_data.pageX;
-        }
-              // yUp
-      if(dpCurrent_data.pageY > pageY){
-        drawCSS['bottom'] = dp.height() - dpCurrent_data.pageY,
-        drawCSS['top'] = 'auto',
-        drawCSS['height'] = dpCurrent_data.pageY - pageY;
-      }
-              // yDown
-      else if(dpCurrent_data.pageY < pageY){
-        drawCSS['top'] = dpCurrent_data.pageY,
-        drawCSS['bottom'] = 'auto',
-        drawCSS['height'] = pageY - dpCurrent_data.pageY;
-      }
-    }
-    if(!draw && dpCurrent.length > 0){
-      dpCurrent.css({
-        top: pageY,
-        left: pageX
-      });
-    }
-    if(draw){
-      dpCurrent.css(drawCSS);
-    }
-  }
-  if(e.type === 'mousedown'){
-    e.preventDefault();
-    draw = true;
-    dpCurrent.data({ "pageX": pageX, "pageY": pageY });
-  }
-  else if(e.type === 'mouseup'){
-    draw = false;
-    if(dpCurrent.width()<10) dpCurrent.remove();
-    dpCurrent.prev().removeClass('last');
-    dpCurrent
-            .addClass('last')
-            .removeClass('current');
-  }
-}
-*/
