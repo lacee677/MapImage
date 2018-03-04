@@ -23,7 +23,7 @@ $(document).ready(function(){
       changeHighlightBoxWindowResize();
     });
 
-    $("#x1").on("change onkeypress mouseup", function(){
+    $("#x1").on("change keypress mouseup", function(){
       if(this.value <= imgOriginal[0] &&
           this.value >= 0 ){
         drawnBox.css({
@@ -34,7 +34,7 @@ $(document).ready(function(){
       console.log(formValues());
     });
 
-    $("#x2").on("change onkeypress mouseup", function(){
+    $("#x2").on("change keypress mouseup", function(){
       if(drawnBox[0].offsetLeft != this.value &&
           this.value < imgOriginal[0] &&
           this.value > 0 ){
@@ -50,7 +50,7 @@ $(document).ready(function(){
       console.log(formValues());
     });
 
-    $("#y1").on("change onkeypress mouseup", function(){
+    $("#y1").on("change keypress mouseup", function(){
       if(this.value <= imgOriginal[1] &&
           this.value >= 0 ){
         drawnBox.css({
@@ -61,7 +61,7 @@ $(document).ready(function(){
       console.log(formValues());
     });
 
-    $("#y2").on("change onkeypress mouseup", function(){
+    $("#y2").on("change keypress mouseup", function(){
       if(drawnBox[0].offsetTop != this.value &&
           this.value < imgOriginal[1] &&
           this.value > 0 ){
